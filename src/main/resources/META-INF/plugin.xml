@@ -37,5 +37,6 @@
             implementationClass="dev.gaphunter.otelspannamingcompanion.gutter.HighCardinalitySpanNameLineMarkerProvider"/>
         <codeInsight.lineMarkerProvider language="kotlin"
             implementationClass="dev.gaphunter.otelspannamingcompanion.gutter.HighCardinalitySpanNameLineMarkerProvider"/>
+        <notificationGroup id="OTel Span Naming Companion" displayType="BALLOON"/>
     </extensions>
 </idea-plugin>
