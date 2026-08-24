@@ -8,6 +8,7 @@ import com.intellij.psi.PsiElement
 import dev.gaphunter.otelspannamingcompanion.detect.JavaSpanFinder
 import dev.gaphunter.otelspannamingcompanion.detect.KotlinSpanFinder
 import dev.gaphunter.otelspannamingcompanion.model.SpanHit
+import dev.gaphunter.otelspannamingcompanion.review.ReviewPrompt
 
 class HighCardinalitySpanNameLineMarkerProvider : LineMarkerProviderDescriptor(), DumbAware {
 
@@ -28,6 +29,10 @@ class HighCardinalitySpanNameLineMarkerProvider : LineMarkerProviderDescriptor()
         for (element in elements) {
             val hit = hitsByElement[element] ?: continue
             result.add(buildMarker(hit))
+
+            val path = file.virtualFile?.path ?: continue
+            val lineNumber = file.viewProvider.document?.getLineNumber(element.textRange.startOffset) ?: -1
+            ReviewPrompt.recordHit(file.project, "$path:$lineNumber")
         }
     }
 
