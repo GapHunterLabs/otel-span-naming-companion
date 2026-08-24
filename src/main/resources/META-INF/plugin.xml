@@ -1,0 +1,41 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin>
+    <id>dev.gaphunter.otelspannamingcompanion</id>
+    <name>OTel Span Naming Companion</name>
+    <vendor>Gap Hunter Labs</vendor>
+    <description><![CDATA[
+        <p>Gutter warning icon on any Java/Kotlin
+        <code>tracer.spanBuilder(...)</code>/<code>tracer.startSpan(...)</code>
+        call whose name argument is built from a dynamic value -- string
+        concatenation in Java, string template interpolation in Kotlin
+        -- instead of a static literal. Per OpenTelemetry's own
+        documented naming guidance, each unique id/value becomes its own
+        span name in the tracing backend instead of a low-cardinality
+        attribute -- the classic high-cardinality-span-name footgun that
+        quietly blows up cost and usability in a real tracing backend.</p>
+        <p><b>100% static text/PSI analysis</b> -- matches the method
+        name by simple text, so it works whether the real OpenTelemetry
+        SDK is on the classpath or not. Java and Kotlin.</p>
+        <p>Stated honestly: v0.1 only detects a direct <code>+</code>
+        concatenation (Java) or <code>$</code>/<code>${}</code>
+        interpolation (Kotlin) written directly in the call's first
+        argument -- a name built earlier and passed in as a single
+        variable isn't covered (yet).</p>
+        <p>Free. No license nags, no telemetry, no network calls.</p>
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.java</depends>
+    <depends>org.jetbrains.kotlin</depends>
+
+    <extensions defaultExtensionNs="org.jetbrains.kotlin">
+        <supportsKotlinPluginMode supportsK1="true" supportsK2="true"/>
+    </extensions>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <codeInsight.lineMarkerProvider language="JAVA"
+            implementationClass="dev.gaphunter.otelspannamingcompanion.gutter.HighCardinalitySpanNameLineMarkerProvider"/>
+        <codeInsight.lineMarkerProvider language="kotlin"
+            implementationClass="dev.gaphunter.otelspannamingcompanion.gutter.HighCardinalitySpanNameLineMarkerProvider"/>
+    </extensions>
+</idea-plugin>
