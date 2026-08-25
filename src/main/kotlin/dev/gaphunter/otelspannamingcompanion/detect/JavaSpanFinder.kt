@@ -1,6 +1,7 @@
 package dev.gaphunter.otelspannamingcompanion.detect
 
 import com.intellij.psi.JavaRecursiveElementWalkingVisitor
+import com.intellij.psi.JavaTokenType
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiLiteralExpression
@@ -42,15 +43,25 @@ object JavaSpanFinder {
 
         val firstArg = call.argumentList.expressions.firstOrNull() ?: return null
         if (firstArg is PsiLiteralExpression) return null
+        // A plain two-operand `a + b` still surfaces as `PsiPolyadicExpression`
+        // at runtime (`PsiBinaryExpression` implements it), so this cast
+        // covers both the two-operand and 3+-operand (`a + b + c`) shapes.
         val polyadic = firstArg as? PsiPolyadicExpression ?: return null
-        if (polyadic.operationTokenType.toString() != "+") return null
-        // At least one operand must be a real string literal -- otherwise
-        // this isn't a "static text + dynamic value" name at all (e.g.
-        // `a + b` where both are numeric variables, unrelated to span
-        // naming).
-        if (polyadic.operands.none { it is PsiLiteralExpression && it.value is String }) return null
+        // IElementType.toString() on JavaTokenType.PLUS is "PLUS", not the
+        // "+" symbol -- comparing against the literal symbol here always
+        // failed silently (confirmed live via a diagnostic test), meaning
+        // this inspection never actually fired since it was first built.
+        if (polyadic.operationTokenType != JavaTokenType.PLUS) return null
+        val operands = polyadic.operands.toList()
+        // Must mix a real string literal with a non-literal (dynamic)
+        // operand -- otherwise this isn't a "static text + dynamic value"
+        // name at all: two literals (`"process " + "order"`) is still a
+        // fully static name (legitimately not flagged), and `a + b` where
+        // neither is a string literal is unrelated to span naming.
+        if (operands.none { it is PsiLiteralExpression && it.value is String }) return null
+        if (operands.all { it is PsiLiteralExpression && it.value is String }) return null
 
-        return SpanHit(leafOf(firstArg))
+        return SpanHit(leafOf(call))
     }
 
     /** Descends to a real leaf PSI element -- `LineMarkerInfo` must never anchor on a composite node (SDK_GOTCHAS.md SS20). */
