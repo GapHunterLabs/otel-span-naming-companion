@@ -33,7 +33,7 @@ object KotlinSpanFinder {
         val template = firstArg as? KtStringTemplateExpression ?: return null
         if (!template.hasInterpolation()) return null
 
-        return SpanHit(leafOf(firstArg))
+        return SpanHit(leafOf(expression))
     }
 
     private fun KtStringTemplateExpression.hasInterpolation(): Boolean =
