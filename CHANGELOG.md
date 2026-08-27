@@ -17,9 +17,9 @@
 - Also fixed the `LineMarkerInfo` anchor: it pointed at a leaf inside
   the span name argument instead of the method call itself, which the
   platform's line-marker collection pass never picked up in practice
-  (same anchoring discipline as the rest of the catalog, `SDK_GOTCHAS.md`
-  SS20, applied to the wrong element). The Kotlin detector (string
-  interpolation) was not affected by either bug.
+  (same anchoring discipline as the rest of the catalog, applied to
+  the wrong element). The Kotlin detector (string interpolation) was
+  not affected by either bug.
 
 ## [0.1.0]
 
